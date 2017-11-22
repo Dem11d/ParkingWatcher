@@ -3,7 +3,7 @@ import {
   StyleSheet,
   Image,
   AsyncStorage,
-  ScrollView, TouchableWithoutFeedback,
+  ScrollView,
 } from 'react-native';
 import Template from "../Template";
 import MapView from 'react-native-maps';
@@ -164,7 +164,7 @@ export default class Maps extends React.Component {
             <Modal isVisible={this.state.isModalVisible}
                    onBackButtonPress={this._hideModal}
             >
-                <TouchableWithoutFeedback  style={{
+                <View  style={{
                   justifyContent: "center",
                   alignItems: "center",
                 }}
