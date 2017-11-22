@@ -16,11 +16,15 @@ export default class Reactor {
   }
 
   async dispatchEvent(eventName, ...args) {
+    console.log(`dispatching event ${eventName} `);
     if(this.events && this.events[eventName] && this.events[eventName]) {
       let length = this.events[eventName].callbacks.length;
       for (let i = 0; i < length; i++) {
         let func = this.events[eventName].callbacks[i];
-        await func(...args);
+        if(args)
+          func(...args);
+        else
+          func();
       }
     }
   }

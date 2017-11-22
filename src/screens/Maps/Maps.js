@@ -19,6 +19,7 @@ import {apiService} from "../../api/ApiService";
 import {locationService} from "../../location/LocationService";
 import {Parking} from "./Parking";
 import Modal from 'react-native-modal'
+import parkingChecker from "../../location/ParkingChecker";
 
 
 export default class Maps extends React.Component {
@@ -27,14 +28,7 @@ export default class Maps extends React.Component {
     super(props);
 
     this.state = {
-      data: [{
-        id: "",
-        name: "",
-        address: "",
-        lat: "",
-        lng: "",
-        favText: "Add To Favorites"
-      }],
+      data: [],
 
       latitudeDelta: 0.0000467769713,
       longitudeDelta: 0.0421,
@@ -58,17 +52,15 @@ export default class Maps extends React.Component {
     }
 
     let callbacks = [];
-    callbacks.push(locationService.addEventListener("newPosition", () => this.setState({data: dataSource.getState().parkings})));
+    callbacks.push(parkingChecker.addEventListener("newParking", () => this.setState({data: dataSource.getState().parking,ready:true})));
 
 
-    if (dataSource.getState().currentPosition) {
+    if (dataSource.getState().currentPosition){
       this.setState({
         usersLongitude: dataSource.getState().currentPosition.longitude,
         usersLatitude: dataSource.getState().currentPosition.latitude,
         longitude: dataSource.getState().currentPosition.longitude,
         latitude: dataSource.getState().currentPosition.latitude,
-        data: dataSource.getState().parkings,
-        ready: true,
       })
     } else {
       let clearInit = locationService.addEventListener("newPosition", () => {
@@ -80,12 +72,21 @@ export default class Maps extends React.Component {
         });
         console.log("ready maps");
         clearInit();
-        this.setState({
-          ready: true,
-          clearCallback: clearInit
-        });
+        if(dataSource.getState().parking) {
+          this.setState({
+            ready: true,
+            parking: dataSource.getState().parking,
+            clearCallback: clearInit
+          });
+        }
+
+
       });
       callbacks.push(clearInit);
+    }
+
+    if(dataSource.getState().parking) {
+      this.setState({ready: true, data: dataSource.getState().parking});
     }
 
     this.setState({callbacksToClear: callbacks});

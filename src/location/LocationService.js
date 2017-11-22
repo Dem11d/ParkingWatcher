@@ -1,6 +1,7 @@
 import {dataSource} from "../data/dataService";
 import {apiService} from "../api/ApiService";
 import Reactor from "../Reactor";
+import {googleAuth} from "../auth";
 
 
 /***
@@ -12,10 +13,13 @@ class LocationService extends Reactor{
   async init() {
     let settings = await apiService.getJSON("settings.php");
     dataSource.updateState({settings: settings});
+
+    googleAuth.addEventListener("login",()=>{this.startWatch()});
+    googleAuth.addEventListener("logout",()=>{this.stopWatch()});
   }
 
   startWatch() {
-    console.log("starting watch for parkings");
+    console.log("starting watch for parking");
     this._callLocation();
   }
 
@@ -24,13 +28,10 @@ class LocationService extends Reactor{
       console.log(err);
       console.log("trying to call position again");
       this._callLocation();
-    }
+    };
 
-    navigator.geolocation.getCurrentPosition(this._handleCurrentPosition.bind(this),
+    navigator.geolocation.getCurrentPosition(this._handleCurrentPosition,
         handleError, {enableHighAccuracy: false, timeout: 20000, maximumAge: 1000});
-    this._nextPositionTimeout();
-
-
   }
 
   stopWatch() {
@@ -41,28 +42,34 @@ class LocationService extends Reactor{
   _nextPositionTimeout(){
     console.log("setting next timeout to obtaining position");
     let delay = dataSource.getState().settings.TimeToUpdate * 1000;
-    // delay = 10000;
-    this.watchTimeoutId = setTimeout(this._callLocation, delay);
+    delay = 5000;
+    this.watchTimeoutId = setTimeout(this._callLocation.bind(this), delay);
   }
 
   async _handleCurrentPosition(position) {
-    console.log("new location");
-    //comparing old and new positions
-    let newPositionObject = {
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-    };
-    let oldPositionObject = dataSource.getState().currentPosition;
-    let newPosStr = JSON.stringify(newPositionObject);
-    let oldPosStr = JSON.stringify(oldPositionObject);
 
-    dataSource.updateState({currentPosition: newPositionObject});
-    if (newPosStr !== oldPosStr) {
-      console.log("old position ",oldPosStr);
-      console.log("new position ",newPosStr);
-      await this.dispatchEvent("newPosition", position);
+    console.log("==================================");
+    console.log(position);
+    console.log("==================================");
+    if(position) {
+      console.log(position.coords);
+      //comparing old and new positions
+      let newPositionObject = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+      let oldPositionObject = dataSource.getState().currentPosition;
+      let newPosStr = JSON.stringify(newPositionObject);
+      let oldPosStr = JSON.stringify(oldPositionObject);
+
+      dataSource.updateState({currentPosition: newPositionObject});
+      if (newPosStr !== oldPosStr) {
+        console.log("old position ", oldPosStr);
+        console.log("new position ", newPosStr);
+        await locationService.dispatchEvent("newPosition", position);
+      }
     }
-    this._nextPositionTimeout();
+    locationService._nextPositionTimeout();
   }
 
 }

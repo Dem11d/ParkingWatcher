@@ -25,7 +25,8 @@ export default class App extends React.Component {
     await dataSource.initStorage();
     await parkingChecker.init();
     await locationService.init();
-    locationService.startWatch();
+    if(dataSource.getState().userId)
+      locationService.startWatch();
 
     this.setState({isReady: true});
   }

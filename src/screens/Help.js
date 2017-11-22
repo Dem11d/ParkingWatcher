@@ -15,10 +15,6 @@ export default class Help extends React.Component {
     }
   }
 
-  _showModal = () => this.setState({isModalVisible: true})
-
-  _hideModal = () => this.setState({isModalVisible: false})
-
   render() {
     let content = (
         <View style={{
@@ -27,29 +23,8 @@ export default class Help extends React.Component {
           justifyContent: "center",
         }}>
           <View>
-            <Button onPress={this._showModal}>
-              <Text>Show Modal</Text>
-            </Button>
+              <Text>Help content</Text>
           </View>
-          <Modal isVisible={this.state.isModalVisible}>
-            <View style={{
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "white",
-              borderRadius: 7,
-              padding:15
-            }}>
-              <Text>Hello!</Text>
-              <View>
-                <Button onPress={this._hideModal}>
-                  <Text>
-                    Close
-                  </Text>
-                </Button>
-              </View>
-            </View>
-
-          </Modal>
         </View>
     )
     return (

@@ -35,8 +35,13 @@ export default class HomeScreen extends React.Component {
     this.setState({ready: true});
   }
 
-  handleSigninGoogle() {
+  async handleSigninGoogle() {
+    this.setState({ready:false});
     googleAuth.login().catch(err => console.log(err));
+    let clearLoginListener = googleAuth.addEventListener("login",()=>{
+      this.setState({ready:true,userId:dataSource.getState().userId});
+      clearLoginListener();
+    })
   }
 
   render() {

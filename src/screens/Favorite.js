@@ -44,7 +44,7 @@ export default class Favorites extends React.Component {
 
   async componentWillReceiveProps() {
 
-    console.log("trying to get parkings");
+    console.log("trying to get parking");
     let parkings = apiService.getJSON("get-parking.php",{uid:dataSource.getState().userId});
     console.log(parkings);
   }
@@ -65,7 +65,7 @@ export default class Favorites extends React.Component {
                 <View style={{flex: 1, justifyContent: 'flex-start'}}>
                   <Image
                       resizeMode="contain"
-                      source={{uri: 'https://data.parkingwatcher.com/parkings/' + item.id + '.jpg'}}
+                      source={{uri: 'https://data.parkingwatcher.com/parking/' + item.id + '.jpg'}}
                       style={styles.canvas}
                       // minimumZoomScale={0.5}
                       // maximumZoomScale={3}

@@ -17,8 +17,16 @@
     "packagerOpts": {
       "assetExts": ["ttf", "mp4"]
     },
+    "android": {
+      "package": "com.example.mynewproject",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyD5jf0f929sHTG5w6KXFtcFLTN9Q_daf7c"
+        }
+      }
+    },
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.example.mynewproject"
     }
   }
 }
