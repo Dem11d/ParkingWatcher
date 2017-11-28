@@ -20,6 +20,7 @@ import {locationService} from "../../location/LocationService";
 import {Parking} from "./Parking";
 import Modal from 'react-native-modal'
 import parkingChecker from "../../location/ParkingChecker";
+import {languageService} from "../../lang/MessageProcessor";
 
 
 export default class Maps extends React.Component {
@@ -53,6 +54,10 @@ export default class Maps extends React.Component {
 
     let callbacks = [];
     callbacks.push(parkingChecker.addEventListener("newParking", () => this.setState({data: dataSource.getState().parking,ready:true})));
+    callbacks.push(locationService.addEventListener("newPosition", () => this.setState({
+      usersLongitude: dataSource.getState().currentPosition.longitude,
+      usersLatitude: dataSource.getState().currentPosition.latitude,
+    })));
 
 
     if (dataSource.getState().currentPosition){
@@ -65,8 +70,6 @@ export default class Maps extends React.Component {
     } else {
       let clearInit = locationService.addEventListener("newPosition", () => {
         this.setState({
-          usersLongitude: dataSource.getState().currentPosition.longitude,
-          usersLatitude: dataSource.getState().currentPosition.latitude,
           longitude: dataSource.getState().currentPosition.longitude,
           latitude: dataSource.getState().currentPosition.latitude,
         });
@@ -185,7 +188,7 @@ export default class Maps extends React.Component {
                           style={{marginTop: 7}}
                           onPress={this._hideModal}>
                         <Text>
-                          Close
+                          {languageService.getMessage("maps_modal_close")}
                         </Text>
                       </Button>
                     </ScrollView>
@@ -241,7 +244,7 @@ export default class Maps extends React.Component {
           <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
             <Spinner color='blue'/>
           </View>);
-    return (<Template title={"Maps"} content={content} {...this.props}/>)
+    return (<Template title={languageService.getMessage("maps_title")} content={content} {...this.props}/>)
   }
 
   onRegionChange(region) {

@@ -2,15 +2,13 @@ import React from 'react';
 import {
   Text,
   View,
-  AsyncStorage,
   StyleSheet,
 } from 'react-native';
 import {Button, Content, Spinner} from "native-base";
-import Template from "./Template";
 import Maps from "./Maps/Maps";
 import {dataSource} from "../data/dataService";
-import {apiService} from "../api/ApiService";
 import {googleAuth} from "../auth";
+import {languageService} from "../lang/MessageProcessor";
 
 
 export default class HomeScreen extends React.Component {
@@ -36,8 +34,12 @@ export default class HomeScreen extends React.Component {
   }
 
   async handleSigninGoogle() {
+    let handleError = (err)=>{
+      console.log(err);
+      this.setState({ready:true});
+    }
     this.setState({ready:false});
-    googleAuth.login().catch(err => console.log(err));
+    googleAuth.login().catch(handleError);
     let clearLoginListener = googleAuth.addEventListener("login",()=>{
       this.setState({ready:true,userId:dataSource.getState().userId});
       clearLoginListener();
@@ -53,7 +55,7 @@ export default class HomeScreen extends React.Component {
               primary
               onPress={() => this.handleSigninGoogle()}>
             <Text style={styles.textButtonStyle}>
-              Sign in with Google +
+              {languageService.getMessage("home_authButton")}
             </Text>
           </Button>
           <Text>  {this.state.userId} </Text>

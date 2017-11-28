@@ -19,6 +19,7 @@ import {
 } from "native-base";
 import {dataSource} from "../data/dataService";
 import Template from "./Template";
+import {languageService} from "../lang/MessageProcessor";
 
 
 export default class Settings extends React.Component {
@@ -28,13 +29,14 @@ export default class Settings extends React.Component {
 
     this.state = {
       radius: Number.parseInt(dataSource.getState().radius),
-      language: dataSource.getState().language,
+      language: languageService.getCurrentLanguage(),
       languageArray: [
-        {label: 'English', value: 0},
-        {label: 'Русский', value: 1},
-        {label: 'Українська', value: 2}
+        {label: 'English', value: "en"},
+        {label: 'Русский', value: "ru"},
+        {label: 'Українська', value: "ua"}
       ]
     }
+    console.log(this.state);
   }
 
   setRadius(val) {
@@ -45,8 +47,7 @@ export default class Settings extends React.Component {
 
   setLanguage(value) {
     console.log("setting language");
-    dataSource.updateState({language: JSON.stringify(value)});
-    AsyncStorage.setItem("language", JSON.stringify(value));
+    languageService.setLanguage(value);
     this.setState({"language": value,languageArray:this.state.languageArray});
   }
 
@@ -55,7 +56,7 @@ export default class Settings extends React.Component {
         <Container>
           <Content>
 
-              <H2 style={[styles.text__indents, styles.text__center]}>Radius settings</H2>
+              <H2 style={[styles.text__indents, styles.text__center]}>{languageService.getMessage("settings_radiusSettings")}</H2>
             <Slider
                 step={1}
                 minimumValue={3}
@@ -63,9 +64,13 @@ export default class Settings extends React.Component {
                 value={this.state.radius}
                 onSlidingComplete={val => this.setRadius(val)}
             />
-            <Text style={{textAlign:"center"}}>radius {this.state.radius} km </Text>
+            <Text style={{textAlign:"center"}}>
+              {languageService.getMessage("settings_radius")}
+              {this.state.radius}
+              {languageService.getMessage("settings_km")}
+              </Text>
 
-            <H2 style={[styles.text__indents, styles.text__center]}>Language settings</H2>
+            <H2 style={[styles.text__indents, styles.text__center]}>{languageService.getMessage("settings_languageSettings")}</H2>
             <List>
               {this.state.languageArray.map((item, index) =>{
                 return (
@@ -79,7 +84,7 @@ export default class Settings extends React.Component {
                       </Body>
                       <Right>
                         <Radio
-                            selected={item.value === Number.parseInt(this.state.language)}
+                            selected={item.value === this.state.language}
                         />
                       </Right>
                     </ListItem>
@@ -89,7 +94,7 @@ export default class Settings extends React.Component {
           </Content>
         </Container>
     );
-    return (<Template {...this.props} content={content} title={"Settings"}/>);
+    return (<Template {...this.props} content={content} title={languageService.getMessage("settings_title")}/>);
 
   }
 }

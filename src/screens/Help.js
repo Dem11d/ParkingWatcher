@@ -5,6 +5,7 @@ import {
 import Template from "./Template";
 import {Body, Button, Content, Text, View} from "native-base";
 import Modal from 'react-native-modal'
+import {languageService} from "../lang/MessageProcessor";
 
 export default class Help extends React.Component {
 
@@ -23,12 +24,12 @@ export default class Help extends React.Component {
           justifyContent: "center",
         }}>
           <View>
-              <Text>Help content</Text>
+              <Text>{languageService.getMessage("help_content")}</Text>
           </View>
         </View>
     )
     return (
-        <Template {...this.props} title={"Help"} content={content}/>
+        <Template {...this.props} title={languageService.getMessage("help_title")} content={content}/>
     )
   }
 }

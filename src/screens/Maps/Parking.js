@@ -22,6 +22,7 @@ import {
 } from 'native-base';
 import {dataSource} from "../../data/dataService";
 import {apiService} from "../../api/ApiService";
+import {languageService} from "../../lang/MessageProcessor";
 
 
 export class Parking extends React.Component {
@@ -43,7 +44,7 @@ export class Parking extends React.Component {
       return (<Button
           block danger
           onPress={() => this.addOrDeleteFavorite(marker.id, "delete")}
-      ><Text>Delete from favorites</Text></Button>)
+      ><Text>{languageService.getMessage("maps_modal_deleteFromFavorites")}</Text></Button>)
     }
     else {
       console.log(favorites);
@@ -52,7 +53,7 @@ export class Parking extends React.Component {
           block success
           onPress={() => this.addOrDeleteFavorite(marker.id, "add")}
 
-      ><Text>Add to favorites</Text></Button>)
+      ><Text>{languageService.getMessage("maps_modal_addToFavorites")}</Text></Button>)
     }
   }
 

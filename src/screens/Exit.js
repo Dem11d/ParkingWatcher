@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import Template from "./Template";
 import {googleAuth} from "../auth";
+import {languageService} from "../lang/MessageProcessor";
 
 export default class Exit extends React.Component {
 
@@ -25,14 +26,14 @@ export default class Exit extends React.Component {
         <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
           <TouchableOpacity style={styles.buttonStyle} onPress={() => this.handleSignOutGoogle()}>
             <Text style={styles.textButtonStyle}>
-              Logout from Google +
+              {languageService.getMessage("exit_buttonExit")}
             </Text>
           </TouchableOpacity>
 
         </View>
     )
 
-    return (<Template {...this.props} title={"Exit"} content={content}/>)
+    return (<Template {...this.props} title={languageService.getMessage("exit_title")} content={content}/>)
   }
 }
 var styles = StyleSheet.create({

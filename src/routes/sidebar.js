@@ -3,6 +3,7 @@ import {StyleSheet, Platform} from 'react-native';
 import {Container, Content, Text, Button} from "native-base";
 import {dataSource} from "../data/dataService";
 import {googleAuth} from "../auth";
+import {languageService} from "../lang/MessageProcessor";
 
 const routes = ["Home","Settings", "Help", "Exit"];
 
@@ -21,6 +22,9 @@ export class SideBar extends React.Component {
     });
     googleAuth.addEventListener("login",()=>{
       this.setState({routes:this.getCurrentRoutes()});
+    })
+    languageService.addEventListener("changeLanguage",()=>{
+      this.forceUpdate();
     })
   }
 
@@ -47,7 +51,7 @@ export class SideBar extends React.Component {
                         this.props.navigation.navigate(data);
                       }}
                   >
-                    <Text>{data}</Text>
+                    <Text>{languageService.getMessage(`sidebar_${data}`.toLowerCase())}</Text>
                   </Button>
               );
             })

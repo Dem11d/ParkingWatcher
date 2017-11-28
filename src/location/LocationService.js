@@ -27,7 +27,7 @@ class LocationService extends Reactor{
     let handleError = (err)=>{
       console.log(err);
       console.log("trying to call position again");
-      this._callLocation();
+      setTimeout(()=>this._callLocation(),200);
     };
 
     navigator.geolocation.getCurrentPosition(this._handleCurrentPosition,
@@ -42,17 +42,12 @@ class LocationService extends Reactor{
   _nextPositionTimeout(){
     console.log("setting next timeout to obtaining position");
     let delay = dataSource.getState().settings.TimeToUpdate * 1000;
-    delay = 5000;
+    delay = 2000;
     this.watchTimeoutId = setTimeout(this._callLocation.bind(this), delay);
   }
 
   async _handleCurrentPosition(position) {
-
-    console.log("==================================");
-    console.log(position);
-    console.log("==================================");
     if(position) {
-      console.log(position.coords);
       //comparing old and new positions
       let newPositionObject = {
         latitude: position.coords.latitude,
