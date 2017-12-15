@@ -42,7 +42,7 @@ class LocationService extends Reactor{
   _nextPositionTimeout(){
     console.log("setting next timeout to obtaining position");
     let delay = dataSource.getState().settings.TimeToUpdate * 1000;
-    delay = 2000;
+    delay = 10000;
     this.watchTimeoutId = setTimeout(this._callLocation.bind(this), delay);
   }
 

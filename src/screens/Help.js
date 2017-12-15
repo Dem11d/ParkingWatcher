@@ -12,7 +12,7 @@ export default class Help extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isModalVisible: false
+      isParkingModalVisible: false
     }
   }
 

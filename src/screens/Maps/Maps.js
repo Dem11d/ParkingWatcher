@@ -21,7 +21,14 @@ import {Parking} from "./Parking";
 import Modal from 'react-native-modal'
 import parkingChecker from "../../location/ParkingChecker";
 import {languageService} from "../../lang/MessageProcessor";
-
+import {InfoPointer} from "./InfoPointer";
+import {ParkingModal} from "./ParkingModal";
+import {InfoPointerModal} from "./infoPointerModal";
+let dataPoints = (require('ParkingWatcher/assets/testdata.json').docs.map(point => {
+  point.geometry.coordinates[0] = 180 * Math.random() - 90;
+  point.geometry.coordinates[1] = 360 * Math.random() - 180;
+  return point;
+}));
 
 export default class Maps extends React.Component {
   constructor(props) {
@@ -31,6 +38,7 @@ export default class Maps extends React.Component {
     this.state = {
       data: [],
 
+      points: [],
       latitudeDelta: 0.0000467769713,
       longitudeDelta: 0.0421,
       error: null,
@@ -38,8 +46,9 @@ export default class Maps extends React.Component {
       imageLoaded: false,
       favourites: false,
       favText: "Add to favourites",
-      isModalVisible: false,
+      isParkingModalVisible: false,
       parkingToShow: null,
+      pointToShow: null,
       ready: false,
 
     };
@@ -53,14 +62,17 @@ export default class Maps extends React.Component {
     }
 
     let callbacks = [];
-    callbacks.push(parkingChecker.addEventListener("newParking", () => this.setState({data: dataSource.getState().parking,ready:true})));
+    callbacks.push(parkingChecker.addEventListener("newParking", () => this.setState({
+      data: dataSource.getState().parking,
+      ready: true
+    })));
     callbacks.push(locationService.addEventListener("newPosition", () => this.setState({
       usersLongitude: dataSource.getState().currentPosition.longitude,
       usersLatitude: dataSource.getState().currentPosition.latitude,
     })));
 
 
-    if (dataSource.getState().currentPosition){
+    if (dataSource.getState().currentPosition) {
       this.setState({
         usersLongitude: dataSource.getState().currentPosition.longitude,
         usersLatitude: dataSource.getState().currentPosition.latitude,
@@ -75,7 +87,7 @@ export default class Maps extends React.Component {
         });
         console.log("ready maps");
         clearInit();
-        if(dataSource.getState().parking) {
+        if (dataSource.getState().parking) {
           this.setState({
             ready: true,
             parking: dataSource.getState().parking,
@@ -88,7 +100,7 @@ export default class Maps extends React.Component {
       callbacks.push(clearInit);
     }
 
-    if(dataSource.getState().parking) {
+    if (dataSource.getState().parking) {
       this.setState({ready: true, data: dataSource.getState().parking});
     }
 
@@ -149,15 +161,48 @@ export default class Maps extends React.Component {
 
   }
 
-  _showModal = () => this.setState({isModalVisible: true});
+  _showParkingModal = () => this.setState({isParkingModalVisible: true});
 
-  _hideModal = () => this.setState({isModalVisible: false});
+  _showPointModal = () => this.setState({isPointModalVisible: true});
 
-  _showParking(item) {
+  _hideParkingModal = () => this.setState({isParkingModalVisible: false});
+
+  _hidePointModal = () => this.setState({isPointModalVisible: false});
+
+
+  _showPoint(item){
+    console.log("showing point");
+    this.setState({pointToShow: item});
+    this._showPointModal();
+  }
+  _showParking = (item)=> {
 
     console.log("showing parking");
     this.setState({parkingToShow: item});
-    this._showModal();
+    this._showParkingModal();
+  };
+  _handleChangeRegion = (region)=>{
+    // let longitudeDelta = region
+
+    let minLatitude = region.latitude - region.latitudeDelta/2;
+    let maxLatitude = region.latitude + region.latitudeDelta/2;
+    let minLongitude = region.longitude - region.longitudeDelta/2;
+    let maxLongitude = region.longitude + region.longitudeDelta/2;
+
+    console.log(`minLatitude = ${minLatitude}`);
+    console.log(`maxLatitude = ${maxLatitude}`);
+    console.log(`minLongitude = ${minLongitude}`);
+    console.log(`maxLongitude = ${maxLongitude}`);
+    console.log(region);
+    let points = dataPoints.filter(point=>{
+      return (
+          minLatitude < point.geometry.coordinates[0] && point.geometry.coordinates[0] < maxLatitude
+          &&
+          minLongitude < point.geometry.coordinates[1] && point.geometry.coordinates[1] < maxLongitude
+      )
+    });
+    console.log("points length",points.length);
+    this.setState({points, ...region})
   }
 
   render() {
@@ -165,38 +210,16 @@ export default class Maps extends React.Component {
     if (this.state.ready) {
       content = (
           <View style={styles.container}>
-            <Modal isVisible={this.state.isModalVisible}
-                   onBackButtonPress={this._hideModal}
-            >
-                <View  style={{
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={()=>console.log("pressed")}
-                >
-                  <View style={{
-                    width: 300,
-                    backgroundColor: "white",
-                    borderRadius: 7,
-                    padding: 15}}>
-                    <ScrollView>
-
-                      <Parking marker={this.state.parkingToShow}/>
-
-                      <Button
-                          block warning
-                          style={{marginTop: 7}}
-                          onPress={this._hideModal}>
-                        <Text>
-                          {languageService.getMessage("maps_modal_close")}
-                        </Text>
-                      </Button>
-                    </ScrollView>
-                  </View>
-                </View>
-
-
-            </Modal>
+            <ParkingModal
+                parkingToShow={this.state.parkingToShow}
+                isVisible={this.state.isParkingModalVisible}
+                hideModal={this._hideParkingModal}
+                onBackButtonPress={this._hideParkingModal}/>
+            <InfoPointerModal
+                pointToShow={this.state.pointToShow}
+                isVisible={this.state.isPointModalVisible}
+                hideModal={this._hidePointModal}
+                onBackButtonPress={this._hidePointModal}/>
 
             <MapView style={styles.map}
                      showsScale={true}
@@ -205,7 +228,7 @@ export default class Maps extends React.Component {
                      showsMyLocationButton={true}
                 //followUserLocation
                      mapType={"standard"}
-                     onRegionChangeComplete={(region) => this.setState(region)}
+                     onRegionChangeComplete={this._handleChangeRegion}
                      region={{
                        latitude: parseFloat(this.state.latitude),
                        longitude: parseFloat(this.state.longitude),
@@ -214,7 +237,7 @@ export default class Maps extends React.Component {
                      }}>
 
               <MapView.Marker
-                  image={require('../../../assets/location/marker.png')}
+                  image={require('ParkingWatcher/assets/location/marker.png')}
                   coordinate={{
                     latitude: this.state.usersLatitude,
                     longitude: this.state.usersLongitude,
@@ -235,6 +258,11 @@ export default class Maps extends React.Component {
                     )
                   }
               )}
+
+              {this.state.points.map((point, index) => {
+                return (<InfoPointer onPress={() => this._showPoint(point)} key={index} pointData={point}/>)
+              })}
+
             </MapView>
           </View>
       );
