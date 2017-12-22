@@ -75,6 +75,8 @@ export class Parking extends React.Component {
   }
 
   render() {
+
+
     let imageFolder = dataSource.getState().settings.ImageFolder;
     if (this.props.marker)
       return (

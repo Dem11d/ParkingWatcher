@@ -1,11 +1,13 @@
 import React from 'react';
 import {
-  StyleSheet, TouchableOpacity
+  StyleSheet, TouchableOpacity, Animated, Easing
 } from 'react-native';
 import Template from "./Template";
 import {Body, Button, Content, Text, View} from "native-base";
 import Modal from 'react-native-modal'
 import {languageService} from "../lang/MessageProcessor";
+import {LinearGradient} from "expo";
+import {Bar, Radar} from "react-native-pathjs-charts";
 
 export default class Help extends React.Component {
 
@@ -17,6 +19,8 @@ export default class Help extends React.Component {
   }
 
   render() {
+
+
     let content = (
         <View style={{
           flex: 1,
@@ -24,7 +28,7 @@ export default class Help extends React.Component {
           justifyContent: "center",
         }}>
           <View>
-              <Text>{languageService.getMessage("help_content")}</Text>
+            <Text>{languageService.getMessage("help_content")}</Text>
           </View>
         </View>
     )

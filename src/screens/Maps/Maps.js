@@ -24,6 +24,8 @@ import {languageService} from "../../lang/MessageProcessor";
 import {InfoPointer} from "./InfoPointer";
 import {ParkingModal} from "./ParkingModal";
 import {InfoPointerModal} from "./infoPointerModal";
+import Gradient from "./Gradient";
+
 let dataPoints = (require('ParkingWatcher/assets/testdata.json').docs.map(point => {
   point.geometry.coordinates[0] = 180 * Math.random() - 90;
   point.geometry.coordinates[1] = 360 * Math.random() - 180;
@@ -38,8 +40,9 @@ export default class Maps extends React.Component {
     this.state = {
       data: [],
 
+      // polygons: [],
       points: [],
-      latitudeDelta: 0.0000467769713,
+      latitudeDelta: 0.0467769713,
       longitudeDelta: 0.0421,
       error: null,
       markerLoaded: false,
@@ -71,6 +74,35 @@ export default class Maps extends React.Component {
       usersLatitude: dataSource.getState().currentPosition.latitude,
     })));
 
+    callbacks.push(locationService.addEventListener("newPosition", (position) => {
+      let newPolygons = (() => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const dLat = this.state.latitudeDelta < 0 ? (360 - this.state.latitudeDelta) : this.state.latitudeDelta;
+        const dLng = this.state.longitudeDelta < 0 ? (180 - this.state.longitudeDelta) : this.state.longitudeDelta;
+        // console.log("dlat", dLat);
+        // console.log("dLng", dLng);
+
+        let arr = [];
+        let count = Math.round(Math.random() * 20);
+        for(let i = 0; i < count+5 ; i++) {
+          let cords = [];
+          for (let j = 0; j < 3; j++) {
+            const lat = latitude - dLat / 2 + dLat * Math.random();
+            const lng = longitude - dLng / 2 + dLng * Math.random();
+            // console.log("lat", lat);
+            // console.log("lng", lng);
+            cords[j] = {latitude: lat, longitude: lng};
+          }
+          arr.push(cords);
+        }
+        return arr;
+      })();
+
+      this.setState({
+        polygons: newPolygons
+      });
+    }));
 
     if (dataSource.getState().currentPosition) {
       this.setState({
@@ -107,60 +139,6 @@ export default class Maps extends React.Component {
     this.setState({callbacksToClear: callbacks});
   }
 
-
-  onPressOnCalloutButton(value, markerText) {
-    console.log("press");
-    let markers = this.state.data;
-    fav = this.state.favoritesParkings;
-    // apiService.callUrl('delete-parking.php',{uid:dataSource.getState().userId,pid:value});
-    if (markerText == "Delete from favourites") {
-      fetch("https://api.parkingwatcher.com/" + dataSource.getState().version + "/delete-parking.php?uid=" + dataSource.getState().userId + "&pid=" + value)
-          .then((response) => response.json())
-          .then((responseData) => {
-            this.setState({status: responseData.status});
-
-            for (let x in markers) {
-              for (let i in fav) {
-                if (value == markers[x].id) {
-                  console.log('', fav[i].name)
-                  markers[x].favText = 'Add to favourites'; //new value
-                  break;
-                }
-              }
-            }
-            this.setState(markers);
-            this.setState({toggle: !this.state.toggle});
-
-            console.log(this.state.favText);
-          })
-          .done();
-    } else {
-      console.log("ZZZZZZ");
-      fetch("https://api.parkingwatcher.com/" + dataSource.getState().version + "/add-parking.php?uid=" + dataSource.getState().userId + "&pid=" + value)
-          .then((response) => response.json())
-          .then((responseData) => {
-            this.setState({status: responseData.status});
-
-
-            for (let x in markers) {
-              for (let i in fav) {
-                if (value == markers[x].id) {
-                  console.log('', fav[i].name)
-                  markers[x].favText = 'Delete from favourites'; //new value
-                  break;
-                }
-              }
-            }
-            this.setState(markers);
-            this.setState({toggle: !this.state.toggle})
-            console.log(this.state.favText);
-            console.log(this.state.status);
-          })
-          .done();
-    }
-
-  }
-
   _showParkingModal = () => this.setState({isParkingModalVisible: true});
 
   _showPointModal = () => this.setState({isPointModalVisible: true});
@@ -169,41 +147,42 @@ export default class Maps extends React.Component {
 
   _hidePointModal = () => this.setState({isPointModalVisible: false});
 
-
-  _showPoint(item){
+  _showPoint(item) {
     console.log("showing point");
     this.setState({pointToShow: item});
     this._showPointModal();
   }
-  _showParking = (item)=> {
+
+  _showParking = (item) => {
 
     console.log("showing parking");
     this.setState({parkingToShow: item});
     this._showParkingModal();
   };
-  _handleChangeRegion = (region)=>{
+
+  _handleChangeRegion = (region) => {
     // let longitudeDelta = region
 
-    let minLatitude = region.latitude - region.latitudeDelta/2;
-    let maxLatitude = region.latitude + region.latitudeDelta/2;
-    let minLongitude = region.longitude - region.longitudeDelta/2;
-    let maxLongitude = region.longitude + region.longitudeDelta/2;
+    let minLatitude = region.latitude - region.latitudeDelta / 2;
+    let maxLatitude = region.latitude + region.latitudeDelta / 2;
+    let minLongitude = region.longitude - region.longitudeDelta / 2;
+    let maxLongitude = region.longitude + region.longitudeDelta / 2;
 
-    console.log(`minLatitude = ${minLatitude}`);
-    console.log(`maxLatitude = ${maxLatitude}`);
-    console.log(`minLongitude = ${minLongitude}`);
-    console.log(`maxLongitude = ${maxLongitude}`);
-    console.log(region);
-    let points = dataPoints.filter(point=>{
+    // console.log(`minLatitude = ${minLatitude}`);
+    // console.log(`maxLatitude = ${maxLatitude}`);
+    // console.log(`minLongitude = ${minLongitude}`);
+    // console.log(`maxLongitude = ${maxLongitude}`);
+    // console.log(region);
+    let points = dataPoints.filter(point => {
       return (
           minLatitude < point.geometry.coordinates[0] && point.geometry.coordinates[0] < maxLatitude
           &&
           minLongitude < point.geometry.coordinates[1] && point.geometry.coordinates[1] < maxLongitude
       )
     });
-    console.log("points length",points.length);
+    console.log("points length", points.length);
     this.setState({points, ...region})
-  }
+  };
 
   render() {
     let content;
@@ -243,6 +222,16 @@ export default class Maps extends React.Component {
                     longitude: this.state.usersLongitude,
                   }}
               />
+
+              {/*{this.state.polygons.map((polygon,index)=>{*/}
+                {/*return(<MapView.Polygon*/}
+                    {/*key={`p${index}`}*/}
+                    {/*fillColor={"rgba(250,10,10,0.1)"}*/}
+                    {/*coordinates={polygon}*/}
+                    {/*strokeColor = {"rgba(100,100,100,0.3)"}*/}
+                {/*/>)*/}
+              {/*})}*/}
+
               {this.state.data.map((marker, id) => {
                     return (
                         <MapView.Marker
@@ -260,10 +249,11 @@ export default class Maps extends React.Component {
               )}
 
               {this.state.points.map((point, index) => {
-                return (<InfoPointer onPress={() => this._showPoint(point)} key={index} pointData={point}/>)
+                return (<InfoPointer onPress={() => this._showPoint(point)} key={point._id} pointData={point}/>)
               })}
 
             </MapView>
+            <Gradient/>
           </View>
       );
     }

@@ -12,7 +12,7 @@ export class InfoPointerModal extends React.Component {
 
     let content = this.props.pointToShow ?
         <View>
-          {Object.keys(this.props.pointToShow.properties).map((key,index) => {
+          {Object.keys(this.props.pointToShow.properties).map((key, index) => {
             let value = this.props.pointToShow.properties[key];
             return <Text key={index}>{key} : {value}</Text>
           })}
